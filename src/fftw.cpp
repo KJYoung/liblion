@@ -177,77 +177,8 @@ namespace relion
 		return (*fComplex);
 	}
 
-	void FourierTransformer::setReal(MultidimArray<float> &input)
-	{
-		bool recomputePlan=false;
-		if (fReal==NULL)
-			recomputePlan=true;
-		else if (dataPtr!=MULTIDIM_ARRAY(input))
-			recomputePlan=true;
-		else
-			recomputePlan=!(fReal->sameShape(input));
-		fFourier.resize(ZSIZE(input),YSIZE(input),XSIZE(input)/2+1);
-		fReal=&input;
 
-		if (recomputePlan)
-		{
-			int ndim=3;
-			if (ZSIZE(input)==1)
-			{
-				ndim=2;
-				if (YSIZE(input)==1)
-					ndim=1;
-			}
-			int *N = new int[ndim];
-			switch (ndim)
-			{
-			case 1:
-				N[0]=XSIZE(input);
-				break;
-			case 2:
-				N[0]=YSIZE(input);
-				N[1]=XSIZE(input);
-				break;
-			case 3:
-				N[0]=ZSIZE(input);
-				N[1]=YSIZE(input);
-				N[2]=XSIZE(input);
-				break;
-			}
-
-			// Destroy both forward and backward plans if they already exist
-			destroyPlans();
-
-#pragma omp critical(Plan)
-			{
-				// Make new plans
-#ifdef FLOAT_PRECISION
-				fPlanForward = fftwf_plan_dft_r2c(ndim, N, MULTIDIM_ARRAY(*fReal),
-					(fftwf_complex*) MULTIDIM_ARRAY(fFourier), FFTW_ESTIMATE);
-				fPlanBackward = fftwf_plan_dft_c2r(ndim, N,
-					(fftwf_complex*) MULTIDIM_ARRAY(fFourier), MULTIDIM_ARRAY(*fReal),
-					FFTW_ESTIMATE);
-#else
-				fPlanForward = fftw_plan_dft_r2c(ndim, N, MULTIDIM_ARRAY(*fReal),
-					(fftw_complex*)MULTIDIM_ARRAY(fFourier), FFTW_ESTIMATE);
-				fPlanBackward = fftw_plan_dft_c2r(ndim, N,
-					(fftw_complex*)MULTIDIM_ARRAY(fFourier), MULTIDIM_ARRAY(*fReal),
-					FFTW_ESTIMATE);
-#endif
-			}
-
-			if (fPlanForward == NULL || fPlanBackward == NULL)
-				REPORT_ERROR("FFTW plans cannot be created");
-
-	#ifdef DEBUG_PLANS
-			std::cerr << " SETREAL fPlanForward= " << fPlanForward << " fPlanBackward= " << fPlanBackward  <<" this= "<<this<< std::endl;
-	#endif
-
-			delete [] N;
-			dataPtr=MULTIDIM_ARRAY(*fReal);
-		}
-	}
-	void FourierTransformer::setReal(MultidimArray<double> &input)
+	void FourierTransformer::setReal(MultidimArray<DOUBLE> &input)
 	{
 		bool recomputePlan=false;
 		if (fReal==NULL)
@@ -573,6 +504,44 @@ namespace relion
 		transformer.FourierTransform(m2, FT2);
 		getFSC(FT1, FT2, fsc);
 	}
+
+	/*
+	void selfScaleToSizeFourier(long int Ydim, long int Xdim, MultidimArray<DOUBLE>& Mpmem, int nThreads)
+	{
+
+		//Mmem = *this
+		//memory for fourier transform output
+		MultidimArray<Complex > MmemFourier;
+		// Perform the Fourier transform
+		FourierTransformer transformerM;
+		transformerM.setThreadsNumber(nThreads);
+		transformerM.FourierTransform(Mpmem, MmemFourier, true);
+
+		// Create space for the downsampled image and its Fourier transform
+		Mpmem.resize(Ydim, Xdim);
+		MultidimArray<Complex > MpmemFourier;
+		FourierTransformer transformerMp;
+		transformerMp.setReal(Mpmem);
+		transformerMp.getFourierAlias(MpmemFourier);
+		long int ihalf = XMIPP_MIN((YSIZE(MpmemFourier)/2+1),(YSIZE(MmemFourier)/2+1));
+		long int xsize = XMIPP_MIN((XSIZE(MmemFourier)),(XSIZE(MpmemFourier)));
+		//Init with zero
+		MpmemFourier.initZeros();
+		for (long int i=0; i<ihalf; i++)
+			for (long int j=0; j<xsize; j++)
+				MpmemFourier(i,j)=MmemFourier(i,j);
+		for (long int i=YSIZE(MpmemFourier)-1, n=1; n < ihalf-1; i--, n++)
+		{
+    		long int ip = YSIZE(MmemFourier) - n;
+    		for (long int j=0; j<xsize; j++)
+				MpmemFourier(i,j)=MmemFourier(ip,j);
+		}
+
+		// Transform data
+		transformerMp.inverseFourierTransform();
+	}
+	*/
+
 
 	void getAbMatricesForShiftImageInFourierTransform(MultidimArray<Complex > &in,
 			MultidimArray<Complex > &out,
