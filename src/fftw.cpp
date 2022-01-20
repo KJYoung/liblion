@@ -505,44 +505,6 @@ namespace relion
 		getFSC(FT1, FT2, fsc);
 	}
 
-	/*
-	void selfScaleToSizeFourier(long int Ydim, long int Xdim, MultidimArray<DOUBLE>& Mpmem, int nThreads)
-	{
-
-		//Mmem = *this
-		//memory for fourier transform output
-		MultidimArray<Complex > MmemFourier;
-		// Perform the Fourier transform
-		FourierTransformer transformerM;
-		transformerM.setThreadsNumber(nThreads);
-		transformerM.FourierTransform(Mpmem, MmemFourier, true);
-
-		// Create space for the downsampled image and its Fourier transform
-		Mpmem.resize(Ydim, Xdim);
-		MultidimArray<Complex > MpmemFourier;
-		FourierTransformer transformerMp;
-		transformerMp.setReal(Mpmem);
-		transformerMp.getFourierAlias(MpmemFourier);
-		long int ihalf = XMIPP_MIN((YSIZE(MpmemFourier)/2+1),(YSIZE(MmemFourier)/2+1));
-		long int xsize = XMIPP_MIN((XSIZE(MmemFourier)),(XSIZE(MpmemFourier)));
-		//Init with zero
-		MpmemFourier.initZeros();
-		for (long int i=0; i<ihalf; i++)
-			for (long int j=0; j<xsize; j++)
-				MpmemFourier(i,j)=MmemFourier(i,j);
-		for (long int i=YSIZE(MpmemFourier)-1, n=1; n < ihalf-1; i--, n++)
-		{
-    		long int ip = YSIZE(MmemFourier) - n;
-    		for (long int j=0; j<xsize; j++)
-				MpmemFourier(i,j)=MmemFourier(ip,j);
-		}
-
-		// Transform data
-		transformerMp.inverseFourierTransform();
-	}
-	*/
-
-
 	void getAbMatricesForShiftImageInFourierTransform(MultidimArray<Complex > &in,
 			MultidimArray<Complex > &out,
 			  TabSine &tab_sin, TabCosine &tab_cos,
