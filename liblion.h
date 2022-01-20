@@ -1,3 +1,8 @@
+#include <stdlib.h>
+ 
+#define _aligned_malloc(size, alignment) aligned_alloc(alignment, size)
+#define _aligned_free(ptr) free(ptr)
+
 #include "src/backprojector.h"
 #include "src/complex.h"
 #include "src/ctf.h"
