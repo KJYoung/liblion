@@ -202,8 +202,8 @@ namespace relion
 			but you need to be careful that an inverse Fourier transform may
 			change the data.
 			*/
-		template <typename T, typename T1>
-		void FourierTransform(T& v, T1& V, bool getCopy = true)
+		template <typename T1>
+		void FourierTransform(MultidimArray<DOUBLE> & v, T1& V, bool getCopy = true)
 		{
 			setReal(v);
 			Transform(FFTW_FORWARD);
@@ -232,8 +232,8 @@ namespace relion
 			can be any matrix1D, 2D or 3D. It is important that the output
 			matrix is already resized to the right size before entering
 			in this function. */
-		template <typename T, typename T1>
-		void inverseFourierTransform(T& V, T1& v)
+		template <typename T1>
+		void inverseFourierTransform(MultidimArray<DOUBLE> & V, T1& v)
 		{
 			setReal(v);
 			setFourier(V);
